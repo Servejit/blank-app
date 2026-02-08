@@ -1,13 +1,18 @@
-# streamlit_stock_tracker_full.py
+# streamlit_app.py
 
 import streamlit as st
 import yfinance as yf
 import pandas as pd
+from streamlit_autorefresh import st_autorefresh
 
 # -----------------------------------
 # PAGE CONFIG
 st.set_page_config(page_title="Live Stock P2L Tracker", layout="wide")
 st.title("📊 Live Stock P2L Tracker")
+
+# -----------------------------------
+# AUTO-REFRESH: every 10 seconds
+st_autorefresh(interval=10*1000, key="stock_refresh")
 
 # -----------------------------------
 # FULL STOCK LIST
@@ -73,7 +78,7 @@ stockstar = [
 ]
 
 # -----------------------------------
-# FUNCTION TO FETCH DATA
+# FETCH DATA
 @st.cache_data(ttl=60)
 def fetch_data():
     rows = []
@@ -86,13 +91,13 @@ def fetch_data():
             rows.append({
                 "Stock": info.get("shortName", sym.replace(".NS","")),
                 "Symbol": sym,
-                "P2L %": round(p2l, 2),
-                "Price": round(price, 2),
-                "% Chg": round(info.get("regularMarketChangePercent", 0), 2),
-                "Low Price": round(ref_low, 2),
-                "Open": round(info.get("open", 0), 2),
-                "High": round(info.get("dayHigh", 0), 2),
-                "Low": round(info.get("dayLow", 0), 2)
+                "P2L %": round(p2l,2),
+                "Price": round(price,2),
+                "% Chg": round(info.get("regularMarketChangePercent",0),2),
+                "Low Price": round(ref_low,2),
+                "Open": round(info.get("open",0),2),
+                "High": round(info.get("dayHigh",0),2),
+                "Low": round(info.get("dayLow",0),2)
             })
         except:
             pass
@@ -120,6 +125,7 @@ def highlight_stocks(row):
 # MAIN APP
 df = fetch_data()
 
+# Sidebar options
 st.sidebar.header("Options")
 sort_option = st.sidebar.selectbox("Sort by:", ["Default", "P2L %"])
 show_highlight = st.sidebar.checkbox("Show Highlighted Stocks (P2L < -1)")
@@ -134,4 +140,3 @@ if show_highlight:
     st.subheader("📌 Highlighted Stocks")
     df_highlight = df[df["P2L %"] < -1]
     st.dataframe(df_highlight.style.apply(highlight_stocks, axis=1))
-    
