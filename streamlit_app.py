@@ -3,7 +3,6 @@
 import streamlit as st
 import yfinance as yf
 import pandas as pd
-from streamlit_autorefresh import st_autorefresh
 
 # -----------------------------------
 # PAGE CONFIG
