@@ -1,4 +1,5 @@
-streamlit
-pandas
-yfinance
-numpy
+streamlit-autorefresh>=0.0.5
+streamlit>=1.28,<2
+pandas>=2.0,<2.2
+yfinance>=0.2,<0.3
+numpy>=1.25,<1.26
