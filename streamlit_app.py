@@ -73,7 +73,7 @@ stockstar = [
 ]
 
 # -----------------------------------
-# FETCH DATA
+# FETCH DATA FUNCTION
 @st.cache_data(ttl=60)
 def fetch_data():
     rows = []
@@ -85,13 +85,13 @@ def fetch_data():
             p2l = ((price - ref_low) / ref_low) * 100
             rows.append({
                 "Stock": info.get("shortName", sym.replace(".NS","")),
-                "P2L %": round(p2l, 2),
-                "Price": round(price, 2),
-                "% Chg": round(info.get("regularMarketChangePercent", 0), 2),
-                "Low Price": round(ref_low, 2),
-                "Open": round(info.get("open", 0), 2),
-                "High": round(info.get("dayHigh", 0), 2),
-                "Low": round(info.get("dayLow", 0), 2)
+                "P2L %": round(p2l,2),
+                "Price": round(price,2),
+                "% Chg": round(info.get("regularMarketChangePercent",0),2),
+                "Low Price": round(ref_low,2),
+                "Open": round(info.get("open",0),2),
+                "High": round(info.get("dayHigh",0),2),
+                "Low": round(info.get("dayLow",0),2)
             })
         except:
             pass
@@ -100,19 +100,16 @@ def fetch_data():
 # -----------------------------------
 # HIGHLIGHT FUNCTION
 def highlight_stocks(row):
-    stock_name = row["Stock"]
     p2l = row["P2L %"]
+    stock_name = row["Stock"]
     color = ''
-    if stock_name in stockstar:
-        if p2l < -2:
-            color = 'orange'
-        elif p2l < 0:
-            color = 'magenta'
-    else:
-        if p2l < -2:
-            color = 'yellow'
-        elif p2l < -1:
-            color = 'hotpink'
+    # Color logic for StockStar not needed as Symbol is removed
+    if p2l < -2:
+        color = 'orange'
+    elif p2l < -1:
+        color = 'hotpink'
+    elif p2l < 0:
+        color = 'magenta'
     return ['color: ' + color if col == 'Stock' else '' for col in row.index]
 
 # -----------------------------------
@@ -127,12 +124,10 @@ show_highlight = st.sidebar.checkbox("Show Highlighted Stocks (P2L < -1)")
 if sort_option == "P2L %":
     df = df.sort_values("P2L %", ascending=False)
 
-# Display All Stocks
 st.subheader("All Stocks")
-st.dataframe(df.style.apply(highlight_stocks, axis=1).format("{:.2f}"))
+st.dataframe(df.style.apply(highlight_stocks, axis=1))
 
-# Display Highlighted Stocks
 if show_highlight:
-    st.subheader("📌 Highlighted Stocks (P2L < -1)")
+    st.subheader("📌 Highlighted Stocks")
     df_highlight = df[df["P2L %"] < -1]
-    st.dataframe(df_highlight.style.apply(highlight_stocks, axis=1).format("{:.2f}"))
+    st.dataframe(df_highlight.style.apply(highlight_stocks, axis=1))
