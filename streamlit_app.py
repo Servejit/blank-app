@@ -11,7 +11,6 @@ st.title("📊 Live Stock P2L Tracker")
 
 # -----------------------------------
 # AUTO-REFRESH: every 10 seconds
-st_autorefresh(interval=10*1000, key="stock_refresh")
 
 # -----------------------------------
 # FULL STOCK LIST
