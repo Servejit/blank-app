@@ -4,13 +4,12 @@ import streamlit as st
 import yfinance as yf
 import pandas as pd
 
-# -----------------------------------
-# PAGE CONFIG
+# -----------------------------
 st.set_page_config(page_title="Live Stock P2L Tracker", layout="wide")
 st.title("📊 Live Stock P2L Tracker")
 
-# -----------------------------------
-# FULL STOCK LIST
+# -----------------------------
+# FULL STOCK LIST (replace with your 150+ stocks)
 stocks = {
     "AMBUJACEM.NS": 492.12, "BAJAJFINSV.NS": 1867.22, "BAJAJHLDNG.NS": 10348.00,
     "BANKBARODA.NS": 269.82, "BEL.NS": 423.42, "BOSCHLTD.NS": 35596.13,
@@ -64,16 +63,14 @@ stocks = {
     "GODREJPROP.NS": 1635.98, "PHOENIXLTD.NS": 1692.00, "ASHOKLEY.NS": 198.26
 }
 
-# -----------------------------------
-# STOCKSTAR LIST
 stockstar = [
     "TCS.NS", "HDFCLIFE.NS", "BEL.NS", "HINDALCO.NS", "NAUKRI.NS",
     "TORNTPHARM.NS", "BOSCHLTD.NS", "SOLARINDS.NS", "OFSS.NS",
     "PIIND.NS", "INDUSINDBK.NS", "VBL.NS", "POLICYBZR.NS"
 ]
 
-# -----------------------------------
-# FETCH DATA FUNCTION
+# -----------------------------
+# Fetch data
 @st.cache_data(ttl=60)
 def fetch_data():
     rows = []
@@ -97,44 +94,49 @@ def fetch_data():
             pass
     return pd.DataFrame(rows)
 
-# -----------------------------------
-# HIGHLIGHT FUNCTION
+# -----------------------------
+# Highlighting
 def highlight_stocks(row):
     p2l = row["P2L %"]
-    color = ''
+    color = ""
     if p2l < -2:
-        color = 'orange'
+        color = "orange"
     elif p2l < -1:
-        color = 'hotpink'
+        color = "hotpink"
     elif p2l < 0:
-        color = 'magenta'
-    return ['color: ' + color if col == 'Stock' else '' for col in row.index]
+        color = "magenta"
+    return ["color: "+color if col=="Stock" else "" for col in row.index]
 
-# -----------------------------------
-# MAIN APP
-df = fetch_data()
+# -----------------------------
+# Session state for sort / refresh
+if "df" not in st.session_state:
+    st.session_state.df = fetch_data()
 
-# Sidebar options
-st.sidebar.header("Options")
-sort_option = st.sidebar.selectbox("Sort by:", ["Default", "P2L %"])
+sort_p2l = st.sidebar.button("📈 Sort by P2L %")
+refresh = st.sidebar.button("🔄 Refresh Data")
 show_highlight = st.sidebar.checkbox("Show Highlighted Stocks (P2L < -1)")
 
-if sort_option == "P2L %":
-    df = df.sort_values("P2L %", ascending=False)
+if refresh:
+    st.session_state.df = fetch_data()
+    st.experimental_rerun()
 
-# Display all stocks with 2 decimals
+df_display = st.session_state.df.copy()
+if sort_p2l:
+    df_display = df_display.sort_values("P2L %", ascending=False)
+
+# -----------------------------
+# Display all stocks
 st.subheader("All Stocks")
 st.dataframe(
-    df.style.format("{:.2f}", subset=["P2L %","Price","% Chg","Low Price","Open","High","Low"])
-        .apply(highlight_stocks, axis=1)
+    df_display.style.format("{:.2f}", subset=["P2L %","Price","% Chg","Low Price","Open","High","Low"])
+              .apply(highlight_stocks, axis=1)
 )
 
 # Display highlighted stocks
 if show_highlight:
     st.subheader("📌 Highlighted Stocks")
-    df_highlight = df[df["P2L %"] < -1]
+    df_highlight = df_display[df_display["P2L %"] < -1]
     st.dataframe(
         df_highlight.style.format("{:.2f}", subset=["P2L %","Price","% Chg","Low Price","Open","High","Low"])
-            .apply(highlight_stocks, axis=1)
+                    .apply(highlight_stocks, axis=1)
     )
-    
