@@ -10,9 +10,6 @@ st.set_page_config(page_title="Live Stock P2L Tracker", layout="wide")
 st.title("📊 Live Stock P2L Tracker")
 
 # -----------------------------------
-# AUTO-REFRESH: every 10 seconds
-
-# -----------------------------------
 # FULL STOCK LIST
 stocks = {
     "AMBUJACEM.NS": 492.12, "BAJAJFINSV.NS": 1867.22, "BAJAJHLDNG.NS": 10348.00,
@@ -88,14 +85,13 @@ def fetch_data():
             p2l = ((price - ref_low) / ref_low) * 100
             rows.append({
                 "Stock": info.get("shortName", sym.replace(".NS","")),
-                "Symbol": sym,
-                "P2L %": round(p2l,2),
-                "Price": round(price,2),
-                "% Chg": round(info.get("regularMarketChangePercent",0),2),
-                "Low Price": round(ref_low,2),
-                "Open": round(info.get("open",0),2),
-                "High": round(info.get("dayHigh",0),2),
-                "Low": round(info.get("dayLow",0),2)
+                "P2L %": round(p2l, 2),
+                "Price": round(price, 2),
+                "% Chg": round(info.get("regularMarketChangePercent", 0), 2),
+                "Low Price": round(ref_low, 2),
+                "Open": round(info.get("open", 0), 2),
+                "High": round(info.get("dayHigh", 0), 2),
+                "Low": round(info.get("dayLow", 0), 2)
             })
         except:
             pass
@@ -104,10 +100,10 @@ def fetch_data():
 # -----------------------------------
 # HIGHLIGHT FUNCTION
 def highlight_stocks(row):
-    sym = row["Symbol"]
+    stock_name = row["Stock"]
     p2l = row["P2L %"]
     color = ''
-    if sym in stockstar:
+    if stock_name in stockstar:
         if p2l < -2:
             color = 'orange'
         elif p2l < 0:
@@ -131,10 +127,12 @@ show_highlight = st.sidebar.checkbox("Show Highlighted Stocks (P2L < -1)")
 if sort_option == "P2L %":
     df = df.sort_values("P2L %", ascending=False)
 
+# Display All Stocks
 st.subheader("All Stocks")
-st.dataframe(df.style.apply(highlight_stocks, axis=1))
+st.dataframe(df.style.apply(highlight_stocks, axis=1).format("{:.2f}"))
 
+# Display Highlighted Stocks
 if show_highlight:
-    st.subheader("📌 Highlighted Stocks")
+    st.subheader("📌 Highlighted Stocks (P2L < -1)")
     df_highlight = df[df["P2L %"] < -1]
-    st.dataframe(df_highlight.style.apply(highlight_stocks, axis=1))
+    st.dataframe(df_highlight.style.apply(highlight_stocks, axis=1).format("{:.2f}"))
