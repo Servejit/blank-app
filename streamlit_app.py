@@ -101,9 +101,7 @@ def fetch_data():
 # HIGHLIGHT FUNCTION
 def highlight_stocks(row):
     p2l = row["P2L %"]
-    stock_name = row["Stock"]
     color = ''
-    # Color logic for StockStar not needed as Symbol is removed
     if p2l < -2:
         color = 'orange'
     elif p2l < -1:
@@ -124,10 +122,19 @@ show_highlight = st.sidebar.checkbox("Show Highlighted Stocks (P2L < -1)")
 if sort_option == "P2L %":
     df = df.sort_values("P2L %", ascending=False)
 
+# Display all stocks with 2 decimals
 st.subheader("All Stocks")
-st.dataframe(df.style.apply(highlight_stocks, axis=1))
+st.dataframe(
+    df.style.format("{:.2f}", subset=["P2L %","Price","% Chg","Low Price","Open","High","Low"])
+        .apply(highlight_stocks, axis=1)
+)
 
+# Display highlighted stocks
 if show_highlight:
     st.subheader("📌 Highlighted Stocks")
     df_highlight = df[df["P2L %"] < -1]
-    st.dataframe(df_highlight.style.apply(highlight_stocks, axis=1))
+    st.dataframe(
+        df_highlight.style.format("{:.2f}", subset=["P2L %","Price","% Chg","Low Price","Open","High","Low"])
+            .apply(highlight_stocks, axis=1)
+    )
+    
